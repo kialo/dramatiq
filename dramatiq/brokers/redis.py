@@ -334,12 +334,15 @@ class _RedisConsumer(Consumer):
                         self.misses, backoff_ms = compute_backoff(self.misses, max_backoff=self.timeout)
                         time.sleep(backoff_ms / 1000)
                         return None
-
-                    # Since we received some number of messages, we
-                    # have to keep track of them.
-                    self.message_refc += len(messages)
         except redis.ConnectionError as e:
             raise ConnectionClosed(e) from None
+
+    def notify_message_is_ready_for_processing(self):
+        # Since we received some number of messages, we have to keep track of them.
+        # We do not increment message_refc for messages with ETA in the future,
+        # in order not to stop prefetching while those are waiting for execution,
+        # otherwise we might block other messages.
+        self.message_refc += 1
 
 
 _scripts = {}

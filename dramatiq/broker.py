@@ -307,6 +307,11 @@ class Consumer:
         """
         raise NotImplementedError
 
+    def notify_message_is_ready_for_processing(self):  # pragma: no cover
+        """To be called when a message fetched from __next__ is ready for processing,
+        i.e. either has no ETA, or the given ETA is reached.
+        """
+
     def close(self):
         """Close this consumer and perform any necessary cleanup actions.
         """

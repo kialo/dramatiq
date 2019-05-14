@@ -295,6 +295,7 @@ class _ConsumerThread(Thread):
             new_message = message.copy(queue_name=queue_name)
             del new_message.options["eta"]
 
+            self.consumer.notify_message_is_ready_for_processing()
             self.broker.enqueue(new_message)
             self.post_process_message(message)
             self.delay_queue.task_done()
@@ -311,6 +312,7 @@ class _ConsumerThread(Thread):
                 self.delay_queue.put((message.options.get("eta", 0), message))
 
             else:
+                self.consumer.notify_message_is_ready_for_processing()
                 actor = self.broker.get_actor(message.actor_name)
                 self.logger.debug("Pushing message %r onto work queue.", message.message_id)
                 self.work_queue.put((actor.priority, message))
